@@ -10,7 +10,7 @@ import torch
 
 
 # Import the model class from model_definition.py
-from model_definition import MLPDetector
+from .model_definition import MLPDetector
 
 # --- Configuration (must match training for architecture) ---
 # These define the architecture of the loaded model

@@ -8,3 +8,6 @@ __pycache__/
 venv/
 env/
 *.env
+*.tfstate
+*.tfstate.*
+.terraform
