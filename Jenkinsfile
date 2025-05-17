@@ -10,7 +10,7 @@ pipeline {
 
     environment{
         registry = 'minhtuan172/nbiot-detector-app'
-        registryCredential = 'dockerhub'      
+        registryCredential = 'docker'      
     }
 
     stages {
@@ -37,6 +37,12 @@ pipeline {
                     echo "Deactivating virtual environment"
                     deactivate
                 '''
+            }
+        }
+        stage('Cooldown') { // Temporary diagnostic stage
+            steps {
+                echo "Pausing for 30 seconds..."
+                sh "sleep 30"
             }
         }
         stage('Build') {

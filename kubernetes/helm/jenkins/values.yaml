@@ -1084,7 +1084,7 @@ agent:
   restrictedPssSecurityContext: false
   # Controls how agent pods are retained after the Jenkins build completes
   # Possible values: Always, Never, OnFailure
-  podRetention: "Always"
+  podRetention: "Never"
   # Disable if you do not want the Yaml the agent pod template to show up
   # in the job Console Output. This can be helpful for either security reasons
   # or simply to clean up the output to make it easier to read.
