@@ -28,7 +28,9 @@ pipeline {
                     echo "Activating virtual environment"
                     . venv/bin/activate 
                     echo "Installing packages into virtual environment"
-                    pip install -r requirements.txt
+                    pip install --no-cache-dir --upgrade pip
+                    pip install --no-cache-dir -r requirements.txt
+                    pip install --no-cache-dir torch --index-url https://download.pytorch.org/whl/cpu
                     echo "Running tests"
                     cd ..
                     pytest
