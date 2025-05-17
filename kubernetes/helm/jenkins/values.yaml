@@ -59,7 +59,7 @@ controller:
   disableRememberMe: false
 
   # -- Set Number of executors
-  numExecutors: 0
+  numExecutors: 1
 
   # -- Sets the executor mode of the Jenkins node. Possible values are "NORMAL" or "EXCLUSIVE"
   executorMode: "NORMAL"
@@ -1257,7 +1257,7 @@ persistence:
   # If undefined (the default) or set to null, no storageClassName spec is
   #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS & OpenStack)
   # -- Storage class for the PVC
-  storageClass:
+  storageClass: jenkins-pv
   # -- Annotations for the PVC
   annotations: {}
   # -- Labels for the PVC

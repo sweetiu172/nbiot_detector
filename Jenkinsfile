@@ -1,32 +1,47 @@
 pipeline {
-    // Any available agent ip:port or an docker image
     agent any
+
+    options{
+        // Max number of build logs to keep and days to keep
+        buildDiscarder(logRotator(numToKeepStr: '5', daysToKeepStr: '5'))
+        // Enable timestamp at each job in the pipeline
+        timestamps()
+    }
+
+    environment{
+        registry = 'minhtuan172/nbiot-detector-app '
+        registryCredential = 'dockerhub'      
+    }
 
     stages {
         stage('Test') {
-            // Only run when it has some changes in a file
-            // when { changeset "main.py" }
-
-            // Only run when it has some changes in a branch
-            // when { branch 'master' }
-
+            agent {
+                docker {
+                    image 'python:3.12' 
+                }
+            }
             steps {
-                echo 'Testing something..'
+                echo 'Testing model correctness..'
+                sh 'cd app && pip install -r requirements.txt && pytest'
             }
         }
         stage('Build') {
             steps {
-                echo 'Building something..'
-
+                script {
+                    echo 'Building image for deployment..'
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                    echo 'Pushing image to dockerhub..'
+                    docker.withRegistry( '', registryCredential ) {
+                        dockerImage.push()
+                        dockerImage.push('latest')
+                    }
+                }
             }
         }
         stage('Deploy') {
             steps {
-                input "Approve?"
-                // A box will be displayed to show whether to proceed 
-                // with the deployment
-                // input 'Do you approve deployment?'
-                echo 'Deploying something..'
+                echo 'Deploying models..'
+                echo 'Running a script to trigger pull and start a docker container'
             }
         }
     }
