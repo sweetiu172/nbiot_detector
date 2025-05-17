@@ -22,7 +22,18 @@ pipeline {
             }
             steps {
                 echo 'Testing model correctness..'
-                sh 'cd app && pip install -r requirements.txt && pytest'
+                sh '''
+                    cd app
+                    python3 -m venv venv
+                    echo "Activating virtual environment"
+                    . venv/bin/activate 
+                    echo "Installing packages into virtual environment"
+                    pip install -r requirements.txt
+                    echo "Running tests"
+                    pytest
+                    echo "Deactivating virtual environment"
+                    deactivate
+                '''
             }
         }
         stage('Build') {
