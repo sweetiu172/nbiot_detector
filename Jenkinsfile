@@ -30,6 +30,7 @@ pipeline {
                     echo "Installing packages into virtual environment"
                     pip install -r requirements.txt
                     echo "Running tests"
+                    cd ..
                     pytest
                     echo "Deactivating virtual environment"
                     deactivate
