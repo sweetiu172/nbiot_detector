@@ -40,6 +40,11 @@ pipeline {
             }
         }
         stage('Build') {
+            agent {
+                docker {
+                    image 'ubuntu:24.04' 
+                }
+            }
             steps {
                 script {
                     echo 'Building image for deployment..'
