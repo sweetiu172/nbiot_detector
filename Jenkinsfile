@@ -39,6 +39,12 @@ pipeline {
                 '''
             }
         }
+        stage('Cooldown') {
+            steps {
+                echo "Pausing for 15 seconds..."
+                sh "sleep 15"
+            }
+        }
         stage('Build') {
             steps {
                 script {
