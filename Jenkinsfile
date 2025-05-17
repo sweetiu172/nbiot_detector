@@ -9,7 +9,7 @@ pipeline {
     }
 
     environment{
-        registry = 'minhtuan172/nbiot-detector-app '
+        registry = 'minhtuan172/nbiot-detector-app'
         registryCredential = 'dockerhub'      
     }
 

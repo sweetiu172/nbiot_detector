@@ -36,10 +36,10 @@ controller:
     # -- Controller image registry
     registry: "docker.io"
     # -- Controller image repository
-    repository: "jenkins/jenkins"
+    repository: "minhtuan172/custom-jenkins"
 
     # -- Controller image tag override; i.e., tag: "2.440.1-jdk21"
-    tag:
+    tag: latest
 
     # -- Controller image tag label
     tagLabel: jdk21
@@ -955,9 +955,12 @@ agent:
   jnlpregistry:
   image:
     # -- Repository to pull the agent jnlp image from
-    repository: "jenkins/inbound-agent"
+    repository: "minhtuan172/custom-jenkins-agent"
     # -- Tag of the image to pull
-    tag: "3309.v27b_9314fd1a_4-2"
+    tag: "latest"
+    volumeMounts:
+    - name: docker-socket
+      mountPath: /var/run/docker.sock
   # -- Configure working directory for default agent
   workingDir: "/home/jenkins/agent"
   nodeUsageMode: "NORMAL"
@@ -974,7 +977,7 @@ agent:
   # -- Configure container user
   runAsUser:
   # -- Configure container group
-  runAsGroup:
+  runAsGroup: 999
   # -- Enables the agent to use the host network
   hostNetworking: false
   # -- Resources allocation (Requests and Limits)
@@ -1017,7 +1020,7 @@ agent:
   # Configure the attributes as they appear in the corresponding Java class for that type
   # https://github.com/jenkinsci/kubernetes-plugin/tree/master/src/main/java/org/csanchez/jenkins/plugins/kubernetes/volumes
   # -- Additional volumes
-  volumes: []
+  volumes:
   # - type: ConfigMap
   #   configMapName: myconfigmap
   #   mountPath: /var/myapp/myconfigmap
@@ -1029,9 +1032,9 @@ agent:
   #   accessModes: ReadWriteOnce
   #   requestsSize: 10Gi
   #   storageClassName: mystorageclass
-  # - type: HostPath
-  #   hostPath: /var/lib/containers
-  #   mountPath: /var/myapp/myhostpath
+  - type: HostPath
+    hostPath: /var/run/docker.sock
+    mountPath: docker-socket
   # - type: Nfs
   #   mountPath: /var/myapp/mynfs
   #   readOnly: false
@@ -1257,7 +1260,7 @@ persistence:
   # If undefined (the default) or set to null, no storageClassName spec is
   #   set, choosing the default provisioner (gp2 on AWS, standard on GKE, AWS & OpenStack)
   # -- Storage class for the PVC
-  storageClass: jenkins-pv
+  storageClass:
   # -- Annotations for the PVC
   annotations: {}
   # -- Labels for the PVC
