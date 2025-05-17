@@ -39,23 +39,31 @@ pipeline {
                 '''
             }
         }
-        stage('Cooldown') {
-            steps {
-                echo "Pausing for 15 seconds..."
-                sh "sleep 15"
-            }
-        }
         stage('Build') {
             steps {
+                echo "--- Build Stage: Entering steps ---"
                 script {
+                    try {
+                        echo "Attempting 'docker version' directly before build logic..."
+                        sh 'docker version' // Basic client-server version check
+                        echo "'docker version' succeeded."
+                        echo "Attempting 'docker ps' directly before build logic..."
+                        sh 'docker ps'      // Check if daemon can list containers
+                        echo "'docker ps' succeeded."
+                    } catch (Exception e) {
+                        echo "CRITICAL DIAGNOSTIC: A simple Docker command FAILED right before docker.build. Error: ${e.getMessage()}"
+                        // This would strongly indicate the connection is already lost by the time 'Build' steps begin
+                    }
+
                     echo 'Building image for deployment..'
+                    // This is the line that previously failed
                     dockerImage = docker.build registry + ":$BUILD_NUMBER" 
+                    
                     echo 'Pushing image to dockerhub..'
                     docker.withRegistry( '', registryCredential ) {
                         dockerImage.push()
                         dockerImage.push('latest')
                     }
-                }
             }
         }
         stage('Deploy') {
