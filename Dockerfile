@@ -50,7 +50,7 @@ COPY --from=builder /opt/venv_builder /opt/venv
 COPY ./app /app_code/app
 
 # Set the working directory to where main.py is, for simpler CMD execution
-WORKDIR /app_code/app
+WORKDIR /app_code
 
 # Change ownership of the venv and the app code directory to the non-root user
 # This should be done after all files are copied and before switching user.
