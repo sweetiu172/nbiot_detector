@@ -39,12 +39,6 @@ pipeline {
                 '''
             }
         }
-        stage('Cooldown') { // Temporary diagnostic stage
-            steps {
-                echo "Pausing for 30 seconds..."
-                sh "sleep 30"
-            }
-        }
         stage('Build') {
             agent {
                 docker {
@@ -54,22 +48,17 @@ pipeline {
             steps {
                 echo "--- Build Stage: Entering steps ---"
                 script {
+                    // Attempt to pull the latest image for caching, but don't fail if it doesn't exist
                     try {
-                        echo "Attempting 'docker version' directly before build logic..."
-                        sh 'docker version' // Basic client-server version check
-                        echo "'docker version' succeeded."
-                        echo "Attempting 'docker ps' directly before build logic..."
-                        sh 'docker ps'      // Check if daemon can list containers
-                        echo "'docker ps' succeeded."
+                        sh "docker pull ${registry}:latest || true"
                     } catch (Exception e) {
-                        echo "CRITICAL DIAGNOSTIC: A simple Docker command FAILED right before docker.build. Error: ${e.getMessage()}"
-                        // This would strongly indicate the connection is already lost by the time 'Build' steps begin
+                        echo "Could not pull latest image for cache, proceeding without it. Error: ${e.getMessage()}"
                     }
 
                     echo 'Building image for deployment..'
-                    // This is the line that previously failed
-                    dockerImage = docker.build registry + ":$BUILD_NUMBER" 
-                    
+                    // Add --cache-from to the docker.build command
+                    dockerImage = docker.build registry + ":$BUILD_NUMBER", "--cache-from ${registry}:latest ."
+
                     echo 'Pushing image to dockerhub..'
                     docker.withRegistry( '', registryCredential ) {
                         dockerImage.push()
