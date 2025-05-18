@@ -65,4 +65,4 @@ EXPOSE 8000
 # Define the command to run the application
 # 'main:app' refers to the 'app' FastAPI instance in 'main.py'
 # Since WORKDIR is /app_code/app, main.py is directly accessible.
-CMD ["/opt/venv/bin/python", "-m", "uvicorn", "main:app", "--host", "0.0.0.0", "--port", "8000"]
+CMD ["/opt/venv/bin/python", "-m", "uvicorn", "app.main:app", "--host", "0.0.0.0", "--port", "8000"]

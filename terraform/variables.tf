@@ -7,3 +7,8 @@ variable "region" {
   description = "The region the cluster in"
   default     = "asia-southeast1-b"
 }
+
+variable "deletion_protection" {
+  description = "For testing purpose"
+  default     = true
+}

@@ -29,6 +29,8 @@ resource "google_container_cluster" "primary" {
   // Specify the initial number of nodes
   initial_node_count = 2
 
+  deletion_protection = var.deletion_protection
+
   // Node configuration
   node_config {
     machine_type = "e2-standard-2" // 2 vCPUs, 8 GB RAM
