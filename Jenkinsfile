@@ -74,8 +74,10 @@ pipeline {
             }
         }
         stage('Deploy') {
-            agent {
-                docker { image 'alpine/k8s:1.32.0' } 
+             agent {
+                kubernetes {
+                    label 'k8s-deploy-agent'
+                }
             }
             environment {
                 KUBE_DEPLOYMENT_NAME = "${env.helmReleaseName}"
