@@ -46,6 +46,11 @@ pipeline {
             }
         }
         stage('Build') {
+            agent {
+                docker {
+                    image 'docker:28-dind' 
+                }
+            }
             steps {
                 echo "--- Build Stage: Entering steps ---"
                 script {
