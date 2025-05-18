@@ -17,8 +17,6 @@ pipeline {
         helmValuesFile = "${helmChartPath}/values.yaml"
         // Kubernetes namespace (optional, defaults to 'default' if not specified in kubeconfig or command)
         kubernetesNamespace = 'default'
-        // Kubeconfig credentials ID (if using Kubernetes plugin for credentials)
-        // kubeconfigCredentialsId = 'your-kubeconfig-credentials-id'
     }
 
     stages {
@@ -81,82 +79,73 @@ pipeline {
             }
             environment {
                 KUBE_DEPLOYMENT_NAME = "${env.helmReleaseName}"
+                APP_NAMESPACE = "${env.kubernetesNamespace}"
             }
             steps {
                 script {
-                    echo "Deploying ${helmReleaseName} using Helm chart from ${helmChartPath}..."
+                    echo "Deploying ${helmReleaseName} to namespace ${APP_NAMESPACE} using Helm chart from ${helmChartPath}..."
                     echo "Image to be deployed: ${registry}:${env.BUILD_NUMBER}"
 
-                    // try {
+                    try {
+                        // No need to explicitly manage KUBECONFIG when running in-cluster with a service account
+                        sh "kubectl config view" // Should show in-cluster config
+                        sh "kubectl auth can-i '*' '*' --all-namespaces=false -n ${APP_NAMESPACE}" // Verify permissions for the SA
 
-                    //     // Lint the Helm chart (optional, but good practice)
-                    //     sh "helm lint ${helmChartPath}"
+                        sh "helm lint ${helmChartPath}"
 
-                    //     sh """
-                    //         helm -n ${kubernetesNamespace} upgrade --install ${helmReleaseName} ${helmChartPath} \
-                    //             -f ${helmValuesFile} \
-                    //             --set image.repository=${registry} \
-                    //             --set image.tag=${env.BUILD_NUMBER} \
-                    //             --atomic \
-                    //             --timeout 10m \
-                    //             --wait \
-                    //             --debug
-                    //     """
+                        // Add --namespace to helm and kubectl commands
+                        sh """
+                            helm upgrade --install ${helmReleaseName} ${helmChartPath} \
+                                -n ${APP_NAMESPACE} \
+                                -f ${helmValuesFile} \
+                                --set image.repository=${registry} \
+                                --set image.tag=${env.BUILD_NUMBER} \
+                                --atomic \
+                                --timeout 10m \
+                                --wait \
+                                --debug
+                        """
 
-                    //     echo "Helm upgrade of ${helmReleaseName} initiated successfully."
-                    //     echo "Waiting for rollout to complete for deployment/${KUBE_DEPLOYMENT_NAME}..."
+                        echo "Helm upgrade of ${helmReleaseName} in namespace ${APP_NAMESPACE} initiated successfully."
+                        echo "Waiting for rollout to complete for deployment/${KUBE_DEPLOYMENT_NAME} in namespace ${APP_NAMESPACE}..."
 
-                    //     sh "kubectl rollout status deployment/${KUBE_DEPLOYMENT_NAME} --timeout=5m"
+                        sh "kubectl rollout status deployment/${KUBE_DEPLOYMENT_NAME} -n ${APP_NAMESPACE} --timeout=5m"
+                        echo "Deployment ${KUBE_DEPLOYMENT_NAME} successfully rolled out in namespace ${APP_NAMESPACE}."
 
-                    //     echo "Deployment ${KUBE_DEPLOYMENT_NAME} successfully rolled out."
+                        echo "Running application-specific health checks (if any)..."
 
-                    //     echo "Running application-specific health checks (if any)..."
+                        timeout(time: 15, unit: 'MINUTES') {
+                            def userInput = input(
+                                id: 'confirmDeployment',
+                                message: "Deployment of ${helmReleaseName} (Image: ${registry}:${env.BUILD_NUMBER}) in namespace ${APP_NAMESPACE} seems successful. Proceed or Rollback?",
+                                parameters: [
+                                    [$class: 'ChoiceParameterDefinition', choices: 'Proceed\nRollback', name: 'ACTION']
+                                ]
+                            )
+                            if (userInput == 'Rollback') {
+                                echo "Manual rollback initiated for ${helmReleaseName} in namespace ${APP_NAMESPACE}."
+                                sh "helm rollback ${helmReleaseName} 0 -n ${APP_NAMESPACE}"
+                                error("Deployment manually rolled back by user.")
+                            } else {
+                                echo "Deployment confirmed by user."
+                            }
+                        }
 
-                    //     // Ask for manual confirmation before proceeding or offering rollback
-                    //     timeout(time: 15, unit: 'MINUTES') { // Timeout for the input step
-                    //         def userInput = input(
-                    //             id: 'confirmDeployment',
-                    //             message: "Deployment of ${helmReleaseName} (Image: ${registry}:${env.BUILD_NUMBER}) seems successful. Proceed or Rollback?",
-                    //             parameters: [
-                    //                 [$class: 'ChoiceParameterDefinition', choices: 'Proceed\nRollback', name: 'ACTION']
-                    //             ]
-                    //         )
-                    //         if (userInput == 'Rollback') {
-                    //             echo "Manual rollback initiated for ${helmReleaseName}."
-                    //             sh "helm rollback ${helmReleaseName} 0" // 0 rolls back to the previous revision
-                    //             error("Deployment manually rolled back by user.")
-                    //         } else {
-                    //             echo "Deployment confirmed by user."
-                    //         }
-                    //     }
-
-                    // } catch (err) {
-                    //     echo "Deployment failed for ${helmReleaseName}. Error: ${err.getMessage()}"
-                    //     echo "Attempting automatic rollback..."
-                        
-                    //     sh "helm history ${helmReleaseName}" // Show history before rollback
-                    //     sh "helm rollback ${helmReleaseName} 0 || echo 'Rollback to previous revision failed or no previous revision found.'"
-
-                    //     // You might want to check the status of the release again after rollback attempt
-                    //     sh "helm status ${helmReleaseName}"
-                    //     error("Deployment failed and rollback attempted for ${helmReleaseName}.")
-                    // }
+                    } catch (err) {
+                        echo "Deployment failed for ${helmReleaseName} in namespace ${APP_NAMESPACE}. Error: ${err.getMessage()}"
+                        echo "Attempting automatic rollback..."
+                        sh "helm history ${helmReleaseName} -n ${APP_NAMESPACE}"
+                        sh "helm rollback ${helmReleaseName} 0 -n ${APP_NAMESPACE} || echo 'Rollback to previous revision failed or no previous revision found.'"
+                        sh "helm status ${helmReleaseName} -n ${APP_NAMESPACE}"
+                        error("Deployment failed and rollback attempted for ${helmReleaseName}.")
+                    }
                 }
             }
-            // post {
-            //     // This block executes regardless of the stage's success or failure,
-            //     // unless an error within the 'steps' block was not caught and terminated the pipeline.
-            //     // always {
-            //     //     echo "Cleaning up deployment step..."
-            //     //     // Example: remove temporary kubeconfig if created
-            //     //     sh 'rm -f ./kubeconfig'
-            //     // }
-            //     // 'failure' block in 'post' could also be used for rollback if not handled by try/catch or --atomic
-            //     // failure {
-            //     //     echo "Deployment failed in post actions, attempting rollback if not already done."
-            //     //     sh "helm rollback ${helmReleaseName} 0"
-            //     // }
-            // }
+            post {
+                always {
+                    echo "Cleaning up deployment step..."
+                }
+            }
         }
     }
 }

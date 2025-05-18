@@ -1,0 +1,34 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: jenkins-agent-sa
+  namespace: jenkins
+---
+# jenkins-helm-role.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  namespace: default
+  name: jenkins-helm-deployer
+rules:
+- apiGroups: ["", "apps", "extensions"] # Adjust based on resources your chart manages
+  resources: ["deployments", "services", "pods", "configmaps", "secrets", "ingresses", "statefulsets", "jobs", "cronjobs"]
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+- apiGroups: [""] # For Helm storing its release information (secrets by default)
+  resources: ["secrets"] # Helm 3 uses secrets by default to store release info
+  verbs: ["get", "list", "watch", "create", "update", "patch", "delete"]
+---
+# jenkins-helm-rolebinding.yaml
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: jenkins-helm-deployer-binding
+  namespace: default
+subjects:
+- kind: ServiceAccount
+  name: jenkins-agent-sa    # The service account Jenkins agent pods use
+  namespace: jenkins         # The namespace where your Jenkins agent SA exists
+roleRef:
+  kind: Role
+  name: jenkins-helm-deployer
+  apiGroup: rbac.authorization.k8s.io
