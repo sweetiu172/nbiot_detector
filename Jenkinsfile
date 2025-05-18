@@ -83,11 +83,7 @@ pipeline {
             }
             steps {
                 script {
-                    echo "Deploying ${helmReleaseName} to namespace ${APP_NAMESPACE} using Helm chart from ${helmChartPath}..."
-                    echo "Image to be deployed: ${registry}:${env.BUILD_NUMBER}"
-
-                    try {
-                        echo "--- KUBERNETES ENVIRONMENT DIAGNOSTICS ---"
+                    echo "--- KUBERNETES ENVIRONMENT DIAGNOSTICS ---"
                     sh 'echo "Attempting to unset KUBECONFIG to ensure in-cluster config is used."'
                     sh 'unset KUBECONFIG || true'
                     sh 'echo "--- Relevant KUBE environment variables ---"'
