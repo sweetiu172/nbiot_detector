@@ -77,6 +77,7 @@ pipeline {
              agent {
                 kubernetes {
                     label 'k8s-deploy-agent'
+                    defaultContainer 'tools' // this container have kubectl and helm
                 }
             }
             environment {
