@@ -101,10 +101,6 @@ pipeline {
                     echo "Image to be deployed: ${registry}:${env.BUILD_NUMBER}"
 
                     try {
-                        // Verify permissions for the pod's service account in the target namespace.
-                        // This command needs to connect to the API server first.
-                        sh "kubectl auth can-i '*' '*' --all-namespaces=false -n ${APP_NAMESPACE}"
-
                         sh "helm lint ${helmChartPath}"
 
                         // Helm upgrade command

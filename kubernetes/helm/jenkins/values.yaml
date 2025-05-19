@@ -1273,7 +1273,7 @@ agent:
     helm: |
       - name: tools
         label: k8s-deploy-agent
-        serviceAccount: jenkins
+        serviceAccount: jenkins-agent-sa
         containers:
           - name: tools
             image: alpine/k8s:1.32.0
