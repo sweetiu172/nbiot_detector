@@ -13,45 +13,34 @@ import app.main as main_module # Import the main module to access its globals
 
 from app.model_definition import MLPDetector
 
-@pytest.fixture
-def client(mocker): # Add mocker to the client fixture
-    """
-    Create a TestClient instance for the FastAPI app.
-    Mocks dependencies for model and scaler loading BEFORE app startup.
-    """
-    # 1. Mock what app.main.joblib.load would return
-    mock_scaler_object = MagicMock() # This will become scaler
-    # Configure its transform method for default behavior if needed, or tests will patch it.
-    # mock_scaler_object.transform.return_value = np.array([[0.0] * INPUT_SIZE]) # Example default
+@pytest.fixture # Default scope is "function"
+def client(mocker):
+    # 1. Mock OTLP Exporters to prevent actual HTTP calls during tests
+    mocker.patch("app.main.OTLPSpanExporter", return_value=MagicMock())
+    mocker.patch("app.main.OTLPLogExporter", return_value=MagicMock())
 
-    # Patch 'joblib.load' in the context of 'app.main' module
+    # 2. Mock ML asset loading (joblib.load, torch.load, MLPDetector constructor)
+    mock_scaler_object = MagicMock()
     mocker.patch("app.main.joblib.load", return_value=mock_scaler_object)
 
-    # 2. Mock what app.main.torch.load would return (model state_dict)
-    # and the subsequent model instantiation and setup
-    mock_model_object = MagicMock(spec=MLPDetector) # This will become model
-    mock_model_object.to.return_value = mock_model_object # for main_module.model.to(device)
-    mock_model_object.eval.return_value = mock_model_object # for main_module.model.eval()
-    # Mock the load_state_dict method as it will be called
+    mock_model_object = MagicMock(spec=MLPDetector)
+    mock_model_object.to.return_value = mock_model_object
+    mock_model_object.eval.return_value = mock_model_object
     mock_model_object.load_state_dict = MagicMock()
-
-    # Patch the MLPDetector constructor within app.main to return our mock_model_object
     mocker.patch("app.main.MLPDetector", return_value=mock_model_object)
-    # Patch torch.load within app.main (though its return is used by load_state_dict, which is on the mock)
-    mocker.patch("app.main.torch.load", return_value={}) # Dummy state_dict
+    mocker.patch("app.main.torch.load", return_value={})
 
-    # Now, when TestClient(app) is called, the app's startup sequence `load_assets`
-    # will use these patched functions and classes.
-    with TestClient(fast_api_app) as c:
-        # After startup, scaler will be mock_scaler_object
-        # and model will be mock_model_object.
+    # Create TestClient AFTER mocks are in place so startup uses them
+    with TestClient(fast_api_app) as c: # Use the imported app instance
+        # Ensure that after startup, the globals in app.main are the mocks
+        # This is implicitly handled as load_assets will use the patched loaders
         yield c
 
 # --- Test for Root Endpoint ---
 def test_read_root(client: TestClient):
     response = client.get("/")
     assert response.status_code == 200
-    assert response.json() == {"message": "N-BaIoT Botnet Detection API. Navigate to /docs for API documentation."}
+    assert response.json() == {"message": "N-BaIoT Botnet Detector API. Navigate to /docs for API documentation."}
 
 # --- Tests for Single Prediction Endpoint (/predict/) ---
 def test_predict_single_instance_valid(client: TestClient, mocker):
@@ -83,7 +72,9 @@ def test_predict_single_instance_invalid_feature_count(client: TestClient):
     invalid_features = {"features": [0.1] * (INPUT_SIZE - 1)}
     response = client.post("/predict/", json=invalid_features)
     assert response.status_code == 400
-    assert "Invalid number of features" in response.json()["detail"]
+    response_detail = response.json()["detail"]
+    assert f"Expected {INPUT_SIZE} features" in response_detail
+    assert f"got {INPUT_SIZE - 1}" in response_detail
 
 def test_predict_single_instance_non_numeric_feature(client: TestClient):
     invalid_features_type = {"features": ["not_a_number"] + [0.1] * (INPUT_SIZE - 1)}
