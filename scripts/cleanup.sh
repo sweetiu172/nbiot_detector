@@ -18,7 +18,7 @@ declare -A HELM_RELEASES_MAP
 HELM_RELEASES_MAP["ingress-nginx"]="ingress-nginx"
 HELM_RELEASES_MAP["jenkins"]="jenkins"
 HELM_RELEASES_MAP["monitoring"]="kube-prometheus-stack"
-HELM_RELEASES_MAP["logging"]="elasticsearch filebeat kibana"
+HELM_RELEASES_MAP["logging"]="kibana elasticsearch filebeat"
 HELM_RELEASES_MAP["tracing"]="jaeger-all-in-one"
 HELM_RELEASES_MAP["default"]="app-nbiot-detector"
 
