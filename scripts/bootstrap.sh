@@ -57,7 +57,7 @@ deploy_chart() {
 
   if [ -d "$chart_path/charts" ] && [ -n "$(ls -A "$chart_path/charts")" ]; then
       log_info "Chart '$release_name' has subcharts. Running helm dependency update..."
-      helm dependency update "$chart_path"
+      # helm dependency update "$chart_path"
   fi
 
   helm "${helm_args[@]}"
@@ -242,6 +242,11 @@ print_service_passwords() {
   if [[ -n "$es_password" ]]; then
     log_info "Elasticsearch User: elastic"
     log_info "Elasticsearch Password: $es_password"
+    if [[ -n "$external_ip_for_url" ]]; then
+        log_info "Access Kibana at: http://kibana.$external_ip_for_url.nip.io (if Ingress was successful)"
+    else
+        log_info "Run at local: kubectl port-forward svc/kibana-kibana -n logging 5601:5601"
+    fi
   else
     log_warning "Could not retrieve Elasticsearch 'elastic' user password."
     log_info "  Tried secrets like '$es_secret_name_official' (key: elastic) and '$es_secret_name_bitnami' (key: password)."
@@ -325,6 +330,7 @@ deploy_chart "jenkins" "jenkins"
 deploy_chart "kube-prometheus-stack" "monitoring"
 deploy_chart "elasticsearch" "logging"
 deploy_chart "filebeat" "logging"
+deploy_chart "kibana" "logging"
 deploy_chart "jaeger-all-in-one" "tracing"
 deploy_chart "app-nbiot-detector" "default"
 log_info "Helm chart deployment process complete."

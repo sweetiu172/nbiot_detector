@@ -1434,18 +1434,18 @@ grafana:
   ## Configure additional grafana datasources (passed through tpl)
   ## ref: https://grafana.com/docs/grafana/latest/administration/provisioning/#datasources
   additionalDataSources: []
-  # - name: prometheus-sample
+  # - name: elasticsearch
   #   access: proxy
   #   basicAuth: true
   #   secureJsonData:
-  #       basicAuthPassword: pass
-  #   basicAuthUser: daco
+  #     basicAuthPassword: pass
+  #   basicAuthUser: elastic
   #   editable: false
   #   jsonData:
-  #       tlsSkipVerify: true
+  #     tlsSkipVerify: true
   #   orgId: 1
-  #   type: prometheus
-  #   url: https://{{ printf "%s-prometheus.svc" .Release.Name }}:9090
+  #   type: elasticsearch
+  #   url: https://elasticsearch-master.logging:9200
   #   version: 1
 
   # Flag to mark provisioned data sources for deletion if they are no longer configured.
