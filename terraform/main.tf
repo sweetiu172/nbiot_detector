@@ -30,11 +30,17 @@ resource "google_container_cluster" "primary" {
   initial_node_count = 2
 
   deletion_protection = var.deletion_protection
+}
 
-  // Node configuration
+resource "google_container_node_pool" "primary_preemptible_nodes" {
+  name       = "${var.project_id}-gke-node-pool"
+  location   = var.region
+  cluster    = google_container_cluster.primary.name
+  node_count = 2
+
   node_config {
     machine_type = "e2-standard-2" // 2 vCPUs, 8 GB RAM
-    disk_size_gb = 30
     spot         = true
+    disk_size_gb = 30
   }
 }
