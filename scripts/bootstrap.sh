@@ -169,8 +169,10 @@ print_service_passwords() {
   local external_ip_for_url="${1:-}" # Pass INGRESS_EXTERNAL_IP if available for URLs
   if [[ -n "$external_ip_for_url" ]]; then
       log_info "Access App Nbiot Detector at: http://app.$external_ip_for_url.nip.io (if Ingress was successful)"
+      log_info "Access Jaeger UI at: http://jaeger.$external_ip_for_url.nip.io (if Ingress was successful)"
   else
       log_info "Run at local: kubectl port-forward svc/app-nbiot-detector 8000:8000"
+      log_info "Run at local: kubectl --namespace tracing port-forward svc/jaeger-all-in-one 16686:16686"
   fi
   echo >&2
   # Jenkins

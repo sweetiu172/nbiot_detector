@@ -10,7 +10,7 @@ TF_VARS_FILE="mlops.tfvars" # Expected inside TERRAFORM_DIR
 K8S_BASE_MANIFESTS_DIR="../kubernetes/base"
 
 # Namespaces to delete (excluding 'default' as it's a system namespace)
-K8S_NAMESPACES_TO_DELETE=("ingress-nginx" "jenkins" "monitoring" "logging")
+K8S_NAMESPACES_TO_DELETE=("ingress-nginx" "jenkins" "monitoring" "logging" "tracing")
 
 # Mapping of namespaces to Helm releases.
 # Release names should match those used in deploy.sh (typically chart directory names)
@@ -19,6 +19,7 @@ HELM_RELEASES_MAP["ingress-nginx"]="ingress-nginx"
 HELM_RELEASES_MAP["jenkins"]="jenkins"
 HELM_RELEASES_MAP["monitoring"]="kube-prometheus-stack"
 HELM_RELEASES_MAP["logging"]="elasticsearch filebeat"
+HELM_RELEASES_MAP["tracing"]="jaeger-all-in-one"
 HELM_RELEASES_MAP["default"]="app-nbiot-detector"
 
 # --- Helper Functions ---
