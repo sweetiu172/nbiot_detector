@@ -16,6 +16,10 @@ services:
     container_name: nbiot_api_container 
     ports:
       - "8000:8000"
+    environment:
+      - OTEL_SERVICE_NAME=nbiot-detector-api
+      - OTEL_EXPORTER_OTLP_TRACES_ENDPOINT=http://jeager:4318/v1/traces
+      - OTEL_EXPORTER_OTLP_LOGS_ENDPOINT=http://jeager:4318/v1/logs
     restart: unless-stopped
 
   jenkins:
@@ -113,8 +117,11 @@ services:
     image: jaegertracing/all-in-one:1.47
     container_name: jaeger
     restart: unless-stopped
+    environment:
+      - COLLECTOR_OTLP_ENABLED=true
     ports:
       - "6831:6831/udp"
+      - "4318:4318"
       - "16686:16686"
 
 
@@ -154,10 +161,6 @@ services:
       # see: https://www.elastic.co/guide/en/elasticsearch/reference/current/bootstrap-checks.html
       discovery.type: single-node
 
-
-networks:
-  monitoring:
-    driver: bridge
 
 volumes:
   setup:

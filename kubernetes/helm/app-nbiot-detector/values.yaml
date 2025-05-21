@@ -84,6 +84,16 @@ resources: {}
   # requests:
   #   cpu: 100m
   #   memory: 128Mi
+extraEnvs:
+- name: OTEL_SERVICE_NAME
+  value: nbiot-detector-api
+- name: OTEL_EXPORTER_OTLP_TRACES_ENDPOINT
+  value: http://jeager.tracing:4318/v1/traces
+- name: OTEL_EXPORTER_OTLP_LOGS_ENDPOINT
+  value: http://jeager.tracing:4318/v1/logs
+
+#  - name: MY_ENVIRONMENT_VAR
+#    value: the_value_goes_here
 
 # This is to setup the liveness and readiness probes more information can be found here: https://kubernetes.io/docs/tasks/configure-pod-container/configure-liveness-readiness-startup-probes/
 livenessProbe:

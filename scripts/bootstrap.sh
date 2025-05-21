@@ -11,7 +11,7 @@ TF_VARS_FILE="mlops.tfvars" # This file is expected inside TERRAFORM_DIR
 K8S_BASE_MANIFESTS_DIR="../kubernetes/base"
 
 # Define your specific namespaces
-K8S_NAMESPACES_LIST=("ingress-nginx" "jenkins" "monitoring" "logging" "default")
+K8S_NAMESPACES_LIST=("ingress-nginx" "jenkins" "monitoring" "logging" "tracing" "default")
 
 # --- Helper Functions ---
 log_info() {
@@ -323,6 +323,7 @@ deploy_chart "jenkins" "jenkins"
 deploy_chart "kube-prometheus-stack" "monitoring"
 deploy_chart "elasticsearch" "logging"
 deploy_chart "filebeat" "logging"
+deploy_chart "jaeger-all-in-one" "tracing"
 deploy_chart "app-nbiot-detector" "default"
 log_info "Helm chart deployment process complete."
 echo >&2 # Blank line to stderr for readability
