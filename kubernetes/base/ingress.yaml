@@ -71,7 +71,7 @@ spec:
               service:
                 name: jaeger-all-in-one
                 port:
-                  number: 80
+                  number: 16686
             path: /
 ---
 apiVersion: networking.k8s.io/v1
