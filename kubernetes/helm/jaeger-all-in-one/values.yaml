@@ -24,7 +24,7 @@ environmentVariables:
   COLLECTOR_OTLP_ENABLED: true
 
 enableHttpZipkinCollector: false
-enableHttpOpenTelemetryCollector: false
+enableHttpOpenTelemetryCollector: true
 
 serviceAccount:
   # Specifies whether a service account should be created
