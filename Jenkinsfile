@@ -48,8 +48,9 @@ pipeline {
         }
         stage('Build') {
             agent {
-                docker {
-                    image 'docker:28-dind' 
+                kubernetes {
+                    label 'docker-build-environment'
+                    defaultContainer 'docker'
                 }
             }
             steps {
