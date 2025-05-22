@@ -18,18 +18,18 @@ provider "google" {
   region  = var.region
 }
 
+
 // Google Kubernetes Engine
 resource "google_container_cluster" "primary" {
   name     = "${var.project_id}-gke"
   location = var.region
 
-  // Enabling Autopilot for this cluster
-  enable_autopilot = false
 
   // Specify the initial number of nodes
   initial_node_count = 2
 
   deletion_protection = var.deletion_protection
+  remove_default_node_pool = true
 }
 
 resource "google_container_node_pool" "primary_preemptible_nodes" {
@@ -39,8 +39,11 @@ resource "google_container_node_pool" "primary_preemptible_nodes" {
   node_count = 2
 
   node_config {
+    preemptible = false
     machine_type = "e2-standard-2" // 2 vCPUs, 8 GB RAM
     spot         = true
     disk_size_gb = 30
   }
+
+
 }

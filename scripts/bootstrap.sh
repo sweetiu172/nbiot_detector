@@ -44,6 +44,9 @@ deploy_chart() {
 
   log_info "Deploying Helm chart '$release_name' from '$chart_path' to namespace '$target_namespace'..."
   local values_file="$chart_path/values.yaml"
+  if [ "$ENVIRONMENT" == "prod" && "$target_namespace" == "jenkins" ]; then
+    values_file="$chart_path/values.prod.yaml"
+  fi
   local helm_args=()
 
   helm_args+=("upgrade" "--install" "$release_name" "$chart_path" "--namespace" "$target_namespace" "--create-namespace")

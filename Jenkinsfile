@@ -22,8 +22,9 @@ pipeline {
     stages {
         stage('Test') {
             agent {
-                docker {
-                    image 'python:3.12' 
+                kubernetes {
+                    label 'python-test-environment'
+                    defaultContainer 'python'
                 }
             }
             steps {
