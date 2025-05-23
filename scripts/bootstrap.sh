@@ -44,7 +44,7 @@ deploy_chart() {
 
   log_info "Deploying Helm chart '$release_name' from '$chart_path' to namespace '$target_namespace'..."
   local values_file="$chart_path/values.yaml"
-  if [ "$ENVIRONMENT" == "prod" && "$target_namespace" == "jenkins" ]; then
+  if [ "$ENVIRONMENT" == "prod" ] && [ "$target_namespace" == "jenkins" ]; then
     values_file="$chart_path/values.prod.yaml"
   fi
   local helm_args=()
@@ -70,19 +70,19 @@ deploy_chart() {
 
 # Function to get the external IP of the ingress-nginx controller
 get_ingress_external_ip() {
-  local service_name="ingress-nginx-controller" 
+  local service_name="ingress-nginx-controller"
   local service_namespace="ingress-nginx"
   local retry_count=0
-  local max_retries=30    
-  local retry_interval=10 
-  local current_external_ip="" 
+  local max_retries=30
+  local retry_interval=10
+  local current_external_ip=""
 
   log_info "Attempting to get External IP for service '$service_name' in namespace '$service_namespace'..."
   while [ $retry_count -lt $max_retries ]; do
     current_external_ip=$(kubectl get service "$service_name" -n "$service_namespace" -o jsonpath='{.status.loadBalancer.ingress[0].ip}' 2>/dev/null || true)
     if [[ -n "$current_external_ip" && "$current_external_ip" != "<none>" && "$current_external_ip" != "<pending>" ]]; then
       log_info "Found External IP: $current_external_ip"
-      echo "$current_external_ip" 
+      echo "$current_external_ip"
       return 0
     fi
     retry_count=$((retry_count + 1))
@@ -93,7 +93,7 @@ get_ingress_external_ip() {
   done
 
   log_error "Failed to get External IP for '$service_name' in namespace '$service_namespace' after $max_retries retries."
-  echo "" 
+  echo ""
   return 1
 }
 
@@ -113,7 +113,7 @@ print_ingress_dns_names() {
       dns_names_found=1
     fi
   done
-  
+
   if [ "$dns_names_found" -eq 0 ]; then
     log_info "  No DNS names found matching pattern in $processed_file."
   fi
@@ -127,7 +127,7 @@ apply_base_kubernetes_manifests() {
 
   local jenkins_volume_file="$K8S_BASE_MANIFESTS_DIR/jenkins-01-volume.yaml"
   local jenkins_role_binding_file="$K8S_BASE_MANIFESTS_DIR/jenkins-helm-role-and-role-binding.yaml"
-  local ingress_template_file="$K8S_BASE_MANIFESTS_DIR/ingress.yaml" 
+  local ingress_template_file="$K8S_BASE_MANIFESTS_DIR/ingress.yaml"
   local processed_ingress_file="/tmp/processed-ingress.yaml"
 
   if [ -f "$jenkins_volume_file" ]; then
@@ -157,7 +157,7 @@ apply_base_kubernetes_manifests() {
           log_warning "Failed to apply processed ingress rules from $processed_ingress_file."
       fi
     else
-      log_error "Failed to process $ingress_template_file with awk command." 
+      log_error "Failed to process $ingress_template_file with awk command."
     fi
   else
     log_warning "$ingress_template_file not found. Skipping."
@@ -179,10 +179,10 @@ print_service_passwords() {
   fi
   echo >&2
   # Jenkins
-  local jenkins_release_name="jenkins" 
+  local jenkins_release_name="jenkins"
   local jenkins_namespace="jenkins"
   # Common secret name pattern for Jenkins chart
-  local jenkins_secret_name="jenkins" 
+  local jenkins_secret_name="jenkins"
   log_info "Attempting to retrieve Jenkins admin password..."
   local jenkins_password
   local jenkins_username
@@ -204,9 +204,9 @@ print_service_passwords() {
   echo >&2 # Blank line to stderr for readability in logs
 
   # Grafana (from kube-prometheus-stack)
-  local grafana_release_name="kube-prometheus-stack" 
+  local grafana_release_name="kube-prometheus-stack"
   local grafana_namespace="monitoring"
-  local grafana_secret_name="${grafana_release_name}-grafana" 
+  local grafana_secret_name="${grafana_release_name}-grafana"
   log_info "Attempting to retrieve Grafana admin password..."
   local grafana_password
   grafana_password=$(kubectl get secret "$grafana_secret_name" -n "$grafana_namespace" -o jsonpath='{.data.admin-password}' 2>/dev/null | base64 --decode 2>/dev/null || echo "")
@@ -225,18 +225,18 @@ print_service_passwords() {
   echo >&2
 
   # Elasticsearch
-  local es_release_name="elasticsearch" 
+  local es_release_name="elasticsearch"
   local es_namespace="logging"
   # Common secret name for Elastic official chart's 'elastic' user
   local es_secret_name_official="${es_release_name}-es-elastic-user"
   # Common secret name for Bitnami chart's 'elastic' user password
-  local es_secret_name_bitnami="elasticsearch-master-credentials" 
+  local es_secret_name_bitnami="elasticsearch-master-credentials"
   log_info "Attempting to retrieve Elasticsearch 'elastic' user password..."
   local es_password=""
-  
+
   # Try official chart secret pattern
   es_password=$(kubectl get secret "$es_secret_name_official" -n "$es_namespace" -o jsonpath='{.data.elastic}' 2>/dev/null | base64 --decode 2>/dev/null || echo "")
-  
+
   # If not found, try Bitnami chart secret pattern
   if [[ -z "$es_password" ]]; then
     es_password=$(kubectl get secret "$es_secret_name_bitnami" -n "$es_namespace" -o jsonpath='{.data.password}' 2>/dev/null | base64 --decode 2>/dev/null || echo "")
@@ -275,43 +275,43 @@ if [ "$ENVIRONMENT" == "local" ]; then
   log_info "Starting LOCAL deployment..."
   check_command_exists "minikube"
   log_info "Starting Minikube..."
-  minikube start 
+  minikube start
 
 
 elif [ "$ENVIRONMENT" == "prod" ]; then
   log_info "Starting PRODUCTION deployment..."
-  check_command_exists "terraform.exe" 
-  check_command_exists "gcloud" 
+  check_command_exists "terraform.exe"
+  check_command_exists "gcloud"
 
   log_info "Navigating to Terraform directory: $TERRAFORM_DIR"
-  cd "$TERRAFORM_DIR" 
+  cd "$TERRAFORM_DIR"
 
   log_info "Initializing Terraform..."
-  terraform.exe init 
+  terraform.exe init
 
   log_info "Applying Terraform configuration (this may take a while)..."
-  terraform.exe apply -var-file="$TF_VARS_FILE" -auto-approve 
+  terraform.exe apply -var-file="$TF_VARS_FILE" -auto-approve
 
   log_info "Terraform apply completed. Configuring kubectl for GKE..."
   CLUSTER_NAME=$(terraform.exe output -raw cluster_name 2>/dev/null || echo "")
-  CLUSTER_LOCATION=$(terraform.exe output -raw cluster_location 2>/dev/null || echo "") 
+  CLUSTER_LOCATION=$(terraform.exe output -raw cluster_location 2>/dev/null || echo "")
   GCLOUD_PROJECT=$(terraform.exe output -raw project_id 2>/dev/null || echo "")
 
   if [ -z "$CLUSTER_NAME" ] || [ -z "$CLUSTER_LOCATION" ] || [ -z "$GCLOUD_PROJECT" ]; then
     log_error "Could not retrieve all cluster details (name, location, project_id) from Terraform outputs."
     # ... (rest of error message) ...
-    exit 1 
+    exit 1
   fi
 
   log_info "Attempting to configure kubectl for GKE cluster: '$CLUSTER_NAME' in '$CLUSTER_LOCATION' (project: '$GCLOUD_PROJECT')"
-  gcloud container clusters get-credentials "$CLUSTER_NAME" --location "$CLUSTER_LOCATION" --project "$GCLOUD_PROJECT" 
-  
+  gcloud container clusters get-credentials "$CLUSTER_NAME" --location "$CLUSTER_LOCATION" --project "$GCLOUD_PROJECT"
+
   log_info "Navigating back to scripts directory..." # Assuming this script is in a 'scripts' subdirectory
-  cd ../scripts 
+  cd ../scripts
 
 else
   log_error "Invalid environment specified. Choose 'local' or 'prod'."
-  exit 1 
+  exit 1
 fi
 
 # --- Common Steps for both environments after cluster is ready ---
@@ -328,7 +328,7 @@ log_info "Namespace creation step complete."
 echo >&2 # Blank line to stderr for readability
 
 log_info "Starting Helm chart deployments based on defined mapping..."
-deploy_chart "ingress-nginx" "ingress-nginx" 
+deploy_chart "ingress-nginx" "ingress-nginx"
 deploy_chart "jenkins" "jenkins"
 deploy_chart "kube-prometheus-stack" "monitoring"
 deploy_chart "elasticsearch" "logging"
@@ -342,7 +342,7 @@ echo >&2 # Blank line to stderr for readability
 INGRESS_EXTERNAL_IP=""
 
 
-set +e 
+set +e
 if [ "$ENVIRONMENT" == "prod" ]; then
   INGRESS_EXTERNAL_IP=$(get_ingress_external_ip)
   GET_IP_STATUS=$?
@@ -352,7 +352,7 @@ if [ "$ENVIRONMENT" == "prod" ]; then
   fi
   echo >&2 # Blank line to stderr for readability
 fi
-set -e 
+set -e
 
 # Apply base Kubernetes manifests
 # apply_base_kubernetes_manifests will use the INGRESS_EXTERNAL_IP (which might be empty)

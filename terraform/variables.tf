@@ -12,3 +12,12 @@ variable "deletion_protection" {
   description = "For testing purpose"
   default     = true
 }
+variable "node_count" {
+  description = "Total nodes in GKE cluster"
+  default     = 4
+}
+
+variable "machine_type" {
+  description = "Node pool machine types"
+  default     = "e2-medium"
+}
