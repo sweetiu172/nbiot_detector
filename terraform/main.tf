@@ -7,7 +7,7 @@ terraform {
       version = "6.35.0" // Provider version
     }
   }
-  required_version = "1.12.0" // Terraform version
+  required_version = ">=1.12.0" // Terraform version
 }
 
 // The library with methods for creating and
@@ -23,6 +23,8 @@ provider "google" {
 resource "google_container_cluster" "primary" {
   name     = "${var.project_id}-gke"
   location = var.region
+
+  initial_node_count = 2
 
   deletion_protection      = var.deletion_protection
   remove_default_node_pool = true

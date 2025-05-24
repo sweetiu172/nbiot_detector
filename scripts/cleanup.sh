@@ -174,7 +174,7 @@ if [ "$ENVIRONMENT" == "local" ]; then
 elif [ "$ENVIRONMENT" == "prod" ]; then
   # --- Production Cleanup (GKE via Terraform) ---
   log_info "Starting PRODUCTION cleanup..."
-  check_command_exists "terraform.exe" # Using .exe for consistency with your deploy script
+  check_command_exists "terraform" # Using .exe for consistency with your deploy script
   check_command_exists "gcloud" 
 
   log_warning "PRODUCTION: Ensure kubectl is configured to point to the correct GKE cluster you intend to clean up!"
@@ -202,13 +202,13 @@ elif [ "$ENVIRONMENT" == "prod" ]; then
   log_info "Current directory: $(pwd)"
   log_info "Initializing Terraform (required before destroy if .terraform directory is missing)..."
   # For destroy, init without -upgrade is usually fine, but -upgrade doesn't hurt.
-  terraform.exe init -upgrade || log_warning "Terraform init failed. If already initialized, destroy might still work."
+  terraform init -upgrade || log_warning "Terraform init failed. If already initialized, destroy might still work."
 
-  log_info "Running 'terraform.exe destroy'. This will remove ALL infrastructure defined in your Terraform configuration."
+  log_info "Running 'terraform destroy'. This will remove ALL infrastructure defined in your Terraform configuration."
   log_warning "Review the plan carefully when prompted by Terraform (unless -auto-approve is used)."
   
   # For safety, -auto-approve is not used by default. User will be prompted by Terraform.
-  if terraform.exe destroy -var-file="$TF_VARS_FILE"; then
+  if terraform destroy -var-file="$TF_VARS_FILE"; then
     log_info "Terraform destroy completed successfully."
   else
     log_error "Terraform destroy failed. Please check the output and your GCP console."

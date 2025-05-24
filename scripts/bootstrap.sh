@@ -280,22 +280,22 @@ if [ "$ENVIRONMENT" == "local" ]; then
 
 elif [ "$ENVIRONMENT" == "prod" ]; then
   log_info "Starting PRODUCTION deployment..."
-  check_command_exists "terraform.exe"
+  check_command_exists "terraform"
   check_command_exists "gcloud"
 
   log_info "Navigating to Terraform directory: $TERRAFORM_DIR"
   cd "$TERRAFORM_DIR"
 
   log_info "Initializing Terraform..."
-  terraform.exe init
+  terraform init
 
   log_info "Applying Terraform configuration (this may take a while)..."
-  terraform.exe apply -var-file="$TF_VARS_FILE" -auto-approve
+  terraform apply -var-file="$TF_VARS_FILE" -auto-approve
 
   log_info "Terraform apply completed. Configuring kubectl for GKE..."
-  CLUSTER_NAME=$(terraform.exe output -raw cluster_name 2>/dev/null || echo "")
-  CLUSTER_LOCATION=$(terraform.exe output -raw cluster_location 2>/dev/null || echo "")
-  GCLOUD_PROJECT=$(terraform.exe output -raw project_id 2>/dev/null || echo "")
+  CLUSTER_NAME=$(terraform output -raw cluster_name 2>/dev/null || echo "")
+  CLUSTER_LOCATION=$(terraform output -raw cluster_location 2>/dev/null || echo "")
+  GCLOUD_PROJECT=$(terraform output -raw project_id 2>/dev/null || echo "")
 
   if [ -z "$CLUSTER_NAME" ] || [ -z "$CLUSTER_LOCATION" ] || [ -z "$GCLOUD_PROJECT" ]; then
     log_error "Could not retrieve all cluster details (name, location, project_id) from Terraform outputs."
