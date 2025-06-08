@@ -11,3 +11,5 @@ env/
 *.tfstate
 *.tfstate.*
 .terraform
+data/
+*.zip
