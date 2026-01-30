@@ -1,0 +1,16 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nbiot-detector
+spec:
+  replicas: 2
+  template:
+    spec:
+      containers:
+      - name: nbiot-detector
+        image: minhtuan172/nbiot-detector-app:7-9a27cc7
+        resources:
+          requests:
+            cpu: "100m"
+
+

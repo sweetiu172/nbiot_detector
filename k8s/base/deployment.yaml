@@ -1,0 +1,24 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nbiot-detector
+  labels:
+    app: nbiot-detector
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nbiot-detector
+  template:
+    metadata:
+      labels:
+        app: nbiot-detector
+    spec:
+      containers:
+      - name: nbiot-detector
+        image: nbiot-detector:latest
+        imagePullPolicy: IfNotPresent
+        ports:
+        - containerPort: 8000
+          name: http 
+          protocol: TCP
