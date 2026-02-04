@@ -53,7 +53,7 @@ COPY --from=builder /opt/venv_builder /opt/venv
 
 # Copy the application code
 # This copies your local './app' directory to '/app_code/app' in the image
-COPY ./app /app_code/app
+COPY . /app_code/app
 
 # Set the working directory to where main.py is, for simpler CMD execution
 WORKDIR /app_code

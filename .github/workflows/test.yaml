@@ -23,8 +23,9 @@ jobs:
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ -f requirements.txt ]; then pip install --no-cache-dir -r requirements.txt; fi
+          if [ -f app/requirements.txt ]; then pip install --no-cache-dir -r app/requirements.txt; fi
 
       - name: Run tests
         run: |
+          cd app
           pytest --cov-fail-under=80
