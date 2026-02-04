@@ -37,7 +37,7 @@ jobs:
         uses: docker/build-push-action@v6
         with:
           context: app
-          push: true
+          push: false
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:${{ github.run_number }}-${{ steps.vars.outputs.sha_short }}
           cache-from: type=gha
