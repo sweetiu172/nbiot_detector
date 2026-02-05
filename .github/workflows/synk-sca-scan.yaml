@@ -1,0 +1,44 @@
+name: Snyk SCA
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  snyk-python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # 1. Setup Python on the Host
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: 'pip'
+
+      # 2. Install Snyk CLI on the Host (instead of using the Docker action)
+      - name: Install Snyk CLI
+        uses: snyk/actions/setup@master
+
+      # 3. Install your dependencies (Now Snyk can see them!)
+      - name: Install Dependencies
+        run: pip install -r app/requirements.txt
+
+      # 4. Run Snyk Test (as a normal shell command)
+      - name: Run Snyk Test
+        continue-on-error: false
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        # Now we just run the command directly
+        run: snyk test --file=app/requirements.txt --severity-threshold=medium
+
+      # 5. Run Snyk Monitor (Upload results)
+      - name: Run Snyk Monitor
+        if: github.ref == 'refs/heads/main'
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        run: snyk monitor --file=app/requirements.txt
