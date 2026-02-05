@@ -1,0 +1,50 @@
+name: Snyk SCA
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+  workflow_dispatch:
+
+jobs:
+  snyk-python:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Source Code
+        uses: actions/checkout@v4
+
+      # Snyk needs to be able to "see" the installed packages to build the dependency tree
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12' 
+
+      - name: Install Dependencies
+        run: |
+          pip install -r requirements.txt
+          # If you use pipenv or poetry, install those instead
+
+      # -------------------------------------------------------
+      # 1. SECURITY GATE (Fails build on bad vulnerabilities)
+      # -------------------------------------------------------
+      - name: Run Snyk to check for vulnerabilities
+        uses: snyk/actions/python@master
+        continue-on-error: false # Set to false if you want to block the build immediately
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: test
+          args: --severity-threshold=high --file=requirements.txt
+
+      # -------------------------------------------------------
+      # 2. MONITORING (Uploads to Snyk Dashboard)
+      # -------------------------------------------------------
+      - name: Upload result to Snyk Dashboard
+        uses: snyk/actions/python@master
+        if: github.ref == 'refs/heads/main' # Only upload on merges to main
+        env:
+          SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
+        with:
+          command: monitor
+          args: --file=requirements.txt
