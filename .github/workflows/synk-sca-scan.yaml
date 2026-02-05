@@ -34,7 +34,7 @@ jobs:
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         # Now we just run the command directly
-        run: snyk test --file=app/requirements.txt --severity-threshold=high
+        run: snyk test --file=app/requirements.txt --severity-threshold=high,critical
 
       # 5. Run Snyk Monitor (Upload results)
       - name: Run Snyk Monitor
