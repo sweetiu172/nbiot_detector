@@ -30,7 +30,7 @@ jobs:
 
       # 4. Run Snyk Test (as a normal shell command)
       - name: Run Snyk Test
-        continue-on-error: true
+        continue-on-error: false
         env:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         # Now we just run the command directly
