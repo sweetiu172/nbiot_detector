@@ -22,7 +22,7 @@ jobs:
 
       - name: Install Dependencies
         run: |
-          pip install -r requirements.txt
+          pip install -r app/requirements.txt
           # If you use pipenv or poetry, install those instead
 
       # -------------------------------------------------------
@@ -35,7 +35,7 @@ jobs:
           SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
         with:
           command: test
-          args: --severity-threshold=high --file=requirements.txt
+          args: --severity-threshold=high --file=app/requirements.txt
 
       # -------------------------------------------------------
       # 2. MONITORING (Uploads to Snyk Dashboard)
