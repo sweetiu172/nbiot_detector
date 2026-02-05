@@ -39,6 +39,9 @@ FEATURE_LIST_PATH = os.path.join(ASSETS_DIR, "lgbm_features.json")
 OTEL_SERVICE_NAME = os.getenv("OTEL_SERVICE_NAME", "nbiot-detector-api")
 OTEL_EXPORTER_OTLP_TRACES_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_TRACES_ENDPOINT", "http://localhost:4318/v1/traces")
 OTEL_EXPORTER_OTLP_LOGS_ENDPOINT = os.getenv("OTEL_EXPORTER_OTLP_LOGS_ENDPOINT", "http://localhost:4318/v1/logs")
+DB_PASSWORD = "pat_UoaMsbnmd"
+
+print(DB_PASSWORD)
 
 # --- Setup Logging ---
 logging.basicConfig(level=logging.INFO, format="%(asctime)s %(levelname)s [%(name)s] - %(message)s")
