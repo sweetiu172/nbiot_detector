@@ -63,7 +63,7 @@ WORKDIR /app_code
 RUN chown -R appuser:appgroup /opt/venv /app_code/app
 
 # Switch to the non-root user
-USER appuser
+USER root
 
 # Expose the port the app runs on
 EXPOSE 8000
