@@ -28,7 +28,7 @@ jobs:
       image: semgrep/semgrep
     steps:
     - uses: actions/checkout@v4
-      run: |
+    - run: |
         semgrep ci \
           --config auto \
           --config .semgrep/config.yml
