@@ -1,0 +1,39 @@
+rules:
+  - id: flask-debug-enabled
+    patterns:
+      - pattern: $APP.run(..., debug=True, ...)
+    message: "Flask debug mode is enabled. This can leak sensitive information in production."
+    languages: [python]
+    severity: ERROR
+
+  - id: flask-insecure-cookie-session
+    patterns:
+      - pattern: $APP.config['SESSION_COOKIE_HTTPONLY'] = False
+    message: "Session cookies should have HTTPOnly set to True to prevent XSS-based theft."
+    languages: [python]
+    severity: WARNING
+
+  - id: flask-unsafe-template-render
+    patterns:
+      - pattern: flask.render_template_string(...)
+    message: "Using render_template_string with user input can lead to Server-Side Template Injection (SSTI)."
+    languages: [python]
+    severity: ERROR
+
+  - id: docker-run-as-root
+    languages: [dockerfile]
+    patterns:
+      - pattern-not-inside: |
+          ...
+          USER $USER
+      - pattern: FROM ...
+    message: "The Dockerfile does not specify a non-root USER. Running as root is a security risk."
+    severity: WARNING
+
+  - id: docker-missing-healthcheck
+    languages: [dockerfile]
+    patterns:
+      - pattern: FROM ...
+      - pattern-not: HEALTHCHECK ...
+    message: "No HEALTHCHECK instruction found. Containers should define health checks for orchestration."
+    severity: INFO
