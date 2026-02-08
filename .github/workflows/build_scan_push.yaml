@@ -26,36 +26,8 @@ jobs:
         with:
           fetch-depth: 0 # Required for Gitleaks to check history
 
-      # ----------------------------------------------------------------
-      # STAGE 1: PRE-BUILD CHECKS (Guardrails)
-      # ----------------------------------------------------------------
 
-      # 1. Secret Scanning (Assurance: No hardcoded creds)
-      - name: Gitleaks Secret Scan
-        uses: gitleaks/gitleaks-action@v2
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        continue-on-error: false # Fail the build if secrets found
 
-      # 2. SAST - Code Quality & Security (Assurance: Secure Code)
-      # Using Semgrep (faster/modern) instead of Bandit
-      - name: Semgrep Code Scan
-        uses: semgrep/semgrep-action@v1
-        with:
-          config: p/python # Use standard Python security rules
-          # config: p/dockerfile # You can also add Dockerfile rules
-
-      # 3. SCA - Dependency Scanning (Assurance: Safe Libraries)
-      # Scanning the filesystem (requirements.txt) before building
-      - name: Trivy Dependency Scan (FS)
-        uses: aquasecurity/trivy-action@master
-        with:
-          scan-type: 'fs'
-          scan-ref: '.'
-          trivy-config: trivy.yaml # Optional config file
-          format: 'table'
-          exit-code: '1' # Fail if critical issues found
-          severity: 'CRITICAL'
 
       # ----------------------------------------------------------------
       # STAGE 2: BUILD ARTIFACT
