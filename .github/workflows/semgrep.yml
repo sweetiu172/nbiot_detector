@@ -1,12 +1,17 @@
 on:
   workflow_dispatch: {}
-  pull_request: {}
+  pull_request:
+    paths:
+      - .github/workflows/semgrep.yml
+      - .semgrep
+      - 'app/**'
   push:
     branches:
     - main
     paths:
     - .github/workflows/semgrep.yml
     - .semgrep
+    - 'app/**'
   schedule:
   # random HH:MM to avoid a load spike on GitHub Actions at 00:00
   - cron: 8 16 * * *
