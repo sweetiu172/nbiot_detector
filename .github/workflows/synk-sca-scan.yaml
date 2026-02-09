@@ -17,7 +17,7 @@ jobs:
       - name: Setup Python
         uses: actions/setup-python@v5
         with:
-          python-version: '3.12'
+          python-version: '3.14'
           cache: 'pip'
 
       # 2. Install Snyk CLI on the Host (instead of using the Docker action)
@@ -26,7 +26,7 @@ jobs:
 
       # 3. Install your dependencies (Now Snyk can see them!)
       - name: Install Dependencies
-        run: pip install -r app/requirements.txt
+        run: pip install -r app/requirements-p314.txt
 
       # 4. Run Snyk Test (as a normal shell command)
       - name: Run Snyk Test

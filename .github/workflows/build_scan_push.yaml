@@ -1,4 +1,4 @@
-name: Build and Push
+name: Build and Push (with Container Scan)
 
 on:
   push:
@@ -13,8 +13,8 @@ env:
   DOCKER_IMAGE_NAME: minhtuan172/nbiot-detector-app
 
 jobs:
-  build:
-    name: Build Docker Image
+  build-and-scan:
+    name: Build, Scan & Push
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -35,29 +35,48 @@ jobs:
         uses: docker/setup-buildx-action@v3
 
       - name: Login to Docker Hub
+        if: github.event_name != 'pull_request'
         uses: docker/login-action@v3
         with:
           username: ${{ secrets.DOCKER_USERNAME }}
           password: ${{ secrets.DOCKER_PASSWORD }}
 
-      - name: Build
+
+      - name: Build Local Image
         uses: docker/build-push-action@v6
-        if: github.ref != 'refs/heads/main'
         with:
           context: app
+          load: true  # <--- CRITICAL: Loads image into local Docker daemon
           push: false
-          tags: |
-            ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.vars.outputs.branch }}-${{ github.run_number }}-${{ steps.vars.outputs.sha_short }}
+          tags: local-image-scan:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-      - name: Build and push
+
+      - name: Analyze Image (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: local-image-scan:latest
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+
+      - name: Scan SBOM (Grype)
+        uses: anchore/scan-action@v3
+        with:
+          sbom: sbom.spdx.json
+          fail-build: true        # Fail if vulns are found
+          severity-cutoff: critical # Only fail on CRITICAL
+          output-format: table    # <--- CRITICAL: Prints the list for debugging
+
+      - name: Push to Registry
+        if: github.ref == 'refs/heads/main' || startsWith(github.ref, 'refs/tags/')
         uses: docker/build-push-action@v6
-        if: github.ref == 'refs/heads/main'
         with:
           context: app
           push: true
           tags: |
             ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.vars.outputs.branch }}-${{ github.run_number }}-${{ steps.vars.outputs.sha_short }}
+            ${{ env.DOCKER_IMAGE_NAME }}:latest
           cache-from: type=gha
           cache-to: type=gha,mode=max

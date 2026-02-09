@@ -6,7 +6,7 @@ This project is a RESTful API designed to detect botnet attacks using machine le
 While the project includes a PyTorch model definition (`app/model_definition.py`), the current active application (`app/main.py`) relies on the LightGBM model.
 
 ## Technologies
-*   **Language:** Python 3.12
+*   **Language:** Python 3.14.3
 *   **Web Framework:** FastAPI, Uvicorn
 *   **Machine Learning:** LightGBM, Scikit-learn (RobustScaler), Pandas, NumPy
 *   **Observability:** OpenTelemetry (OTLP exporters for traces and logs)
@@ -26,10 +26,20 @@ While the project includes a PyTorch model definition (`app/model_definition.py`
 ## Building and Running
 
 ### Local Development
-1.  **Environment Setup:**
+1.  **Environment Setup (Conda - Recommended for Windows/Python 3.14+):**
+    ```bash
+    conda env create -f environment.yaml
+    conda activate nbiot-detector
+    ```
+
+    *Alternative (Standard venv):*
     ```bash
     python -m venv venv
-    source venv/bin/activate  # or venv\Scripts\activate on Windows
+    # Linux/MacOS
+    source venv/bin/activate
+    # Windows
+    venv\Scripts\activate
+    
     pip install -r requirements.txt
     ```
 2.  **Run Application:**

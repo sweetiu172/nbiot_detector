@@ -1,6 +1,6 @@
 # ---- Stage 1: Builder ----
 # Change base image to Alpine to match the runtime environment for compiled dependencies
-FROM python:3.12-slim AS builder
+FROM python:3.14.3-slim AS builder
 
 LABEL stage="builder"
 
@@ -17,7 +17,7 @@ RUN python -m venv .
 ENV PATH="/opt/venv_builder/bin:$PATH"
 
 # Copy requirements.txt
-COPY ./requirements.txt /opt/venv_builder/requirements.txt
+COPY ./requirements-p314.txt /opt/venv_builder/requirements.txt
 
 # Install Python dependencies into the virtual environment
 # Use --no-cache-dir to reduce layer size.
@@ -25,7 +25,7 @@ RUN pip install --no-cache-dir -r requirements.txt
     # pip install --no-cache-dir torch==2.7.0 --index-url https://download.pytorch.org/whl/cpu
 
 # ---- Stage 2: Runtime ----
-FROM python:3.12-slim AS runtime
+FROM python:3.14.3-slim AS runtime
 
 LABEL stage="runtime"
 
