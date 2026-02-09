@@ -17,7 +17,7 @@ RUN python -m venv .
 ENV PATH="/opt/venv_builder/bin:$PATH"
 
 # Copy requirements.txt
-COPY ./requirements.txt /opt/venv_builder/requirements.txt
+COPY ./requirements-p314.txt /opt/venv_builder/requirements.txt
 
 # Install Python dependencies into the virtual environment
 # Use --no-cache-dir to reduce layer size.

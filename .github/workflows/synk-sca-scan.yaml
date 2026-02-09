@@ -26,7 +26,7 @@ jobs:
 
       # 3. Install your dependencies (Now Snyk can see them!)
       - name: Install Dependencies
-        run: pip install -r app/requirements.txt
+        run: pip install -r app/requirements-p314.txt
 
       # 4. Run Snyk Test (as a normal shell command)
       - name: Run Snyk Test

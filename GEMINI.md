@@ -26,10 +26,20 @@ While the project includes a PyTorch model definition (`app/model_definition.py`
 ## Building and Running
 
 ### Local Development
-1.  **Environment Setup:**
+1.  **Environment Setup (Conda - Recommended for Windows/Python 3.14+):**
+    ```bash
+    conda env create -f environment.yaml
+    conda activate nbiot-detector
+    ```
+
+    *Alternative (Standard venv):*
     ```bash
     python -m venv venv
-    source venv/bin/activate  # or venv\Scripts\activate on Windows
+    # Linux/MacOS
+    source venv/bin/activate
+    # Windows
+    venv\Scripts\activate
+    
     pip install -r requirements.txt
     ```
 2.  **Run Application:**
