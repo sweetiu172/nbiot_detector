@@ -8,7 +8,7 @@ spec:
     spec:
       containers:
       - name: nbiot-detector
-        image: minhtuan172/nbiot-detector-app:main-17-b96f325
+        image: minhtuan172/nbiot-detector-app:main-6-9a0d4ca
         resources:
           requests:
             cpu: "100m"
