@@ -6,7 +6,7 @@ This project is a RESTful API designed to detect botnet attacks using machine le
 While the project includes a PyTorch model definition (`app/model_definition.py`), the current active application (`app/main.py`) relies on the LightGBM model.
 
 ## Technologies
-*   **Language:** Python 3.12
+*   **Language:** Python 3.14.3
 *   **Web Framework:** FastAPI, Uvicorn
 *   **Machine Learning:** LightGBM, Scikit-learn (RobustScaler), Pandas, NumPy
 *   **Observability:** OpenTelemetry (OTLP exporters for traces and logs)
