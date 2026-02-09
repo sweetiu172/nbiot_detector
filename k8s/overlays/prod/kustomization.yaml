@@ -8,3 +8,8 @@ namespace: nbiot-detector
 
 patches:
   - path: patch-deployment.yaml
+  - path: patch-http-route.yaml
+    target:
+      group: gateway.networking.k8s.io
+      version: v1
+      kind: HTTPRoute
