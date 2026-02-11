@@ -3,6 +3,10 @@ kind: HTTPRoute
 metadata:
   name: nbiot-detector-route
 spec:
+  parentRefs:
+  - name: internal-gateway
+    namespace: kube-system
+    sectionName: https
   hostnames:
   - "app.tuan-lnm.org"
   rules:
