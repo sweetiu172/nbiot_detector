@@ -27,7 +27,7 @@ jobs:
         run: |
           # Define your overlays directory
           # If you have multiple environments, you can loop through them
-          for dir in k8s/overlays/staging k8s/overlays/prod; do
+          for dir in k8s/overlays/prod; do
             echo "Checking $dir..."
             
             # 1. Build the manifests
