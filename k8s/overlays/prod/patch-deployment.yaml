@@ -11,6 +11,10 @@ spec:
         image: minhtuan172/nbiot-detector-app:main-6-9a0d4ca
         resources:
           requests:
-            cpu: "100m"
+            cpu: "10m"
+            memory: "150Mi"
+          limits:
+            cpu: "15m"
+            memory: "200Mi"
 
 

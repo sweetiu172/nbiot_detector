@@ -2,7 +2,7 @@ on:
   workflow_dispatch: {}
   pull_request:
     paths:
-      - .github/workflows/semgrep.yml
+      - .github/workflows/semgrep.yaml
       - .semgrep
       - 'app/**'
   push:
