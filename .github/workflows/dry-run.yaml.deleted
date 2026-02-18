@@ -1,0 +1,38 @@
+name: K8s Dry Run
+
+on:
+  pull_request:
+    paths:
+    - .github/workflows/dry-run.yaml
+    - 'k8s/**'
+  push:
+    branches: [ main ]
+
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: fluxcd/pkg/actions/kustomize@main
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Kustomize Build & Dry Run
+        run: |
+          # Define your overlays directory
+          # If you have multiple environments, you can loop through them
+          for dir in k8s/overlays/prod; do
+            echo "Checking $dir..."
+            
+            # 1. Build the manifests
+            # 2. Pipe to kubectl for client-side validation
+            kustomize build $dir | kubectl apply --dry-run=client -f -
+            
+            echo "Successfully validated $dir"
+          done
