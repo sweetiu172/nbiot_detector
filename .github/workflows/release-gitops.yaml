@@ -14,6 +14,7 @@ jobs:
   update-image:
     name: Update Image Tag in Manifests
     runs-on: ubuntu-latest
+    environment: production   # ← pauses here until a required reviewer approves
     # Only run when the upstream workflow succeeded
     if: ${{ github.event.workflow_run.conclusion == 'success' }}
 
@@ -21,9 +22,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
-          # Use a PAT so the commit triggers downstream workflows/ArgoCD webhooks
-          token: ${{ secrets.GH_TOKEN }}
           ref: main
+          # No token here — uses the default GITHUB_TOKEN (always available)
+          # The PAT is only injected at push time below
 
       - name: Derive image tag from triggering run
         id: tag
@@ -50,6 +51,11 @@ jobs:
         run: |
           git config user.name  "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Inject PAT into remote URL so the push can trigger ArgoCD webhooks
+          git remote set-url origin \
+            https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+
           git add ${{ env.DEPLOYMENT_PATCH }}
           git diff --cached --quiet && echo "No changes to commit" && exit 0
           git commit -m "chore(gitops): release ${{ env.DOCKER_IMAGE_NAME }}:${{ steps.tag.outputs.image_tag }}"
