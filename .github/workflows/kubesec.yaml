@@ -1,0 +1,70 @@
+name: Kubesec Security Scan
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/kubesec.yaml'
+  pull_request:
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/kubesec.yaml'
+
+jobs:
+  kubesec-scan:
+    name: Kustomize Build → Kubesec Scan
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Kustomize
+        uses: fluxcd/pkg/actions/kustomize@main
+
+      - name: Install kubesec
+        run: |
+          VERSION=$(curl -s https://api.github.com/repos/controlplaneio/kubesec/releases/latest \
+            | grep tag_name | cut -d '"' -f4)
+          curl -sSL "https://github.com/controlplaneio/kubesec/releases/download/${VERSION}/kubesec_linux_amd64.tar.gz" \
+            | tar -xz kubesec
+          sudo mv kubesec /usr/local/bin/kubesec
+          kubesec version
+
+      - name: Scan rendered manifests for each overlay
+        run: |
+          FAILED=0
+
+          for overlay in k8s/overlays/*/; do
+            echo "══════════════════════════════"
+            echo " Overlay: $overlay"
+            echo "══════════════════════════════"
+
+            # Build fully-merged manifests (base + patches)
+            kustomize build "$overlay" > /tmp/rendered.yaml
+            echo "── Rendered manifest ──"
+            cat /tmp/rendered.yaml
+            echo ""
+
+            # kubesec scans all resources and exits non-zero for unsupported kinds
+            # (Service, HTTPRoute, etc.) — capture output and ignore exit code
+            echo "── Kubesec Scan ──"
+            RESULT=$(kubesec scan /tmp/rendered.yaml || true)
+            echo "$RESULT" | jq .
+
+            # Only check resources kubesec actually understands (valid: true)
+            # Unsupported kinds (Service, HTTPRoute) are skipped automatically
+            echo "── Check supported resources ──"
+            NEGATIVE=$(echo "$RESULT" | jq '[.[] | select(.valid == true and .score < 0)] | length')
+            if [ "$NEGATIVE" -gt 0 ]; then
+              echo "::error::$NEGATIVE resource(s) in $overlay scored negative — FAILED"
+              echo "$RESULT" | jq '[.[] | select(.valid == true and .score < 0) | {resource: .object, score: .score, critical: .scoring.critical}]'
+              FAILED=1
+            else
+              echo "✓ All supported resources in $overlay passed"
+            fi
+            echo ""
+          done
+
+          exit $FAILED
