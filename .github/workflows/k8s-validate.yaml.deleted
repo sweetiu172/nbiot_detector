@@ -1,0 +1,36 @@
+name: K8s Manifest Validate
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/k8s-validate.yaml'
+  pull_request:
+    paths:
+      - 'k8s/**'
+      - '.github/workflows/k8s-validate.yaml'
+
+jobs:
+  validate:
+    name: Kustomize Build & Dry-Run
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Kustomize
+        uses: fluxcd/pkg/actions/kustomize@main
+
+      - name: Install kubectl
+        uses: azure/setup-kubectl@v3
+        with:
+          version: 'latest'
+
+      - name: Validate all overlays
+        run: |
+          for dir in k8s/overlays/*/; do
+            echo "── Validating $dir ──"
+            kustomize build "$dir" | kubectl apply --dry-run=client -f -
+            echo "✓ $dir passed"
+          done
