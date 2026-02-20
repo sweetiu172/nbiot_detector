@@ -165,6 +165,7 @@ def predict_single(data: NetworkFeaturesInput):
         current_span.set_status(Status(StatusCode.ERROR, "Error during prediction"))
         raise HTTPException(status_code=500, detail="An unexpected error occurred during prediction.")
 
+
 @app.post("/predict_batch", response_model=List[PredictionResponse], summary="Predict a Batch from a CSV File")
 async def predict_batch(file: UploadFile = File(...)):
     current_span = trace.get_current_span()

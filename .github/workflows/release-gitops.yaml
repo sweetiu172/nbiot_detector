@@ -54,7 +54,7 @@ jobs:
 
           # Inject PAT into remote URL so the push can trigger ArgoCD webhooks
           git remote set-url origin \
-            https://x-access-token:${{ secrets.GH_TOKEN }}@github.com/${{ github.repository }}.git
+            https://x-access-token:${{ secrets.GITOPS_TOKEN }}@github.com/${{ github.repository }}.git
 
           git add ${{ env.DEPLOYMENT_PATCH }}
           git diff --cached --quiet && echo "No changes to commit" && exit 0
