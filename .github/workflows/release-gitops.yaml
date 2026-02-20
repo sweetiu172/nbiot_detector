@@ -23,8 +23,7 @@ jobs:
         uses: actions/checkout@v4
         with:
           ref: main
-          # No token here — uses the default GITHUB_TOKEN (always available)
-          # The PAT is only injected at push time below
+          persist-credentials: false  # ← prevents GITHUB_TOKEN from overriding our PAT push
 
       - name: Derive image tag from triggering run
         id: tag
