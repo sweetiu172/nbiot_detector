@@ -47,20 +47,22 @@ jobs:
             cat /tmp/rendered.yaml
             echo ""
 
-            # kubesec scans all resources in the file and returns an array
+            # kubesec scans all resources and exits non-zero for unsupported kinds
+            # (Service, HTTPRoute, etc.) — capture output and ignore exit code
             echo "── Kubesec Scan ──"
-            kubesec scan /tmp/rendered.yaml
-            # echo "$RESULT" | jq .
+            RESULT=$(kubesec scan /tmp/rendered.yaml || true)
+            echo "$RESULT" | jq .
 
-            # Check every resource's score — fail if any is negative
-            echo "── Check resources ──"
-            NEGATIVE=$(echo "$RESULT" | jq '[.[] | select(.score < 0)] | length')
+            # Only check resources kubesec actually understands (valid: true)
+            # Unsupported kinds (Service, HTTPRoute) are skipped automatically
+            echo "── Check supported resources ──"
+            NEGATIVE=$(echo "$RESULT" | jq '[.[] | select(.valid == true and .score < 0)] | length')
             if [ "$NEGATIVE" -gt 0 ]; then
               echo "::error::$NEGATIVE resource(s) in $overlay scored negative — FAILED"
-              echo "$RESULT" | jq '[.[] | select(.score < 0) | {resource: .object.metadata.name, score: .score, scoring: .scoring.critical}]'
+              echo "$RESULT" | jq '[.[] | select(.valid == true and .score < 0) | {resource: .object, score: .score, critical: .scoring.critical}]'
               FAILED=1
             else
-              echo "✓ All resources in $overlay passed"
+              echo "✓ All supported resources in $overlay passed"
             fi
             echo ""
           done
