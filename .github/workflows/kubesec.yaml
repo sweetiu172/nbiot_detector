@@ -48,10 +48,12 @@ jobs:
             echo ""
 
             # kubesec scans all resources in the file and returns an array
+            echo "── Kubesec Scan ──"
             RESULT=$(kubesec scan /tmp/rendered.yaml)
             echo "$RESULT" | jq .
 
             # Check every resource's score — fail if any is negative
+            echo "── Check resources ──"
             NEGATIVE=$(echo "$RESULT" | jq '[.[] | select(.score < 0)] | length')
             if [ "$NEGATIVE" -gt 0 ]; then
               echo "::error::$NEGATIVE resource(s) in $overlay scored negative — FAILED"
