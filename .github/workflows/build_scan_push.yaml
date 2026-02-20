@@ -4,10 +4,13 @@ on:
   push:
     branches: [ "main" ]
     tags: [ 'v*.*.*' ]
+    paths:
+      - 'app/**'
+      - '.github/workflows/build_scan_push.yaml'
   pull_request:
     paths:
       - 'app/**'
-      - '.github/workflows/build.yaml'
+      - '.github/workflows/build_scan_push.yaml'
 
 env:
   DOCKER_IMAGE_NAME: minhtuan172/nbiot-detector-app
