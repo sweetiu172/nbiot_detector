@@ -10,6 +10,7 @@ on:
   schedule:
   # random HH:MM to avoid a load spike on GitHub Actions at 00:00
   - cron: 8 16 * * *
+  workflow_dispatch: 
 
 jobs:
   snyk-python:
