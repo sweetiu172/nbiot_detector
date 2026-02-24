@@ -1,0 +1,32 @@
+name: Scheduled SBOM and Security Scan
+
+on:
+  schedule:
+    - cron: 8 16 * * *  
+  workflow_dispatch:      # Allow manual trigger
+
+env:
+  DOCKER_IMAGE_NAME: minhtuan172/nbiot-detector-app
+
+jobs:
+  scheduled-sbom-and-scan:
+    name: Scheduled SBOM & Vulnerability Scan
+    runs-on: ubuntu-latest
+    steps:
+      - name: Pull Latest Image from Registry
+        run: docker pull ${{ env.DOCKER_IMAGE_NAME }}:latest
+
+      - name: Generate SBOM (Syft)
+        uses: anchore/sbom-action@v0
+        with:
+          image: ${{ env.DOCKER_IMAGE_NAME }}:latest
+          format: spdx-json
+          output-file: sbom.spdx.json
+
+      - name: Scan SBOM (Grype)
+        uses: anchore/scan-action@v3
+        with:
+          sbom: sbom.spdx.json
+          fail-build: true
+          severity-cutoff: critical
+          output-format: table
