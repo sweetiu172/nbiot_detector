@@ -1,5 +1,9 @@
 # N-BaIoT Botnet Detector API
 
+[![Python 3.14.3](https://img.shields.io/badge/python-3.14.3-blue.svg)](https://www.python.org/downloads/release/python-3143/)
+[![FastAPI](https://img.shields.io/badge/FastAPI-0.100+-green.svg)](https://fastapi.tiangolo.com)
+[![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=flat&logo=docker&logoColor=white)](https://www.docker.com/)
+
 ## Project Overview
 This project is a RESTful API designed to detect botnet attacks using machine learning. It specifically utilizes a **LightGBM** model trained on the N-BaIoT dataset. The application is built with **FastAPI** and includes **OpenTelemetry** integration for comprehensive tracing and logging.
 
@@ -14,22 +18,12 @@ While the project includes a PyTorch model definition (`app/model_definition.py`
 *   **Orchestration:** Kubernetes (Kustomize)
 *   **CI/CD:** GitHub Actions
 
-## CI/CD Pipeline
+## CI/CD Pipeline (GitHub Actions)
 The project utilizes GitHub Actions for continuous integration and continuous deployment:
 *   **Build & Push:** (`build_scan_push.yaml`) Builds the Docker image, scans it, and pushes it to the registry.
 *   **GitOps Release:** (`release-gitops.yaml`) Updates Kubernetes manifests for deployment.
 *   **Testing:** (`unit-test.yaml`) Runs the `pytest` test suite.
 *   **Security:** Regular scans using Snyk (`synk-sca-scan.yaml`), Semgrep (`semgrep.yaml`), Gitleaks (`gitleaks.yaml`), and Kubesec (`kubesec.yaml`).
-
-## Project Structure
-*   `app/`: Main application source code.
-    *   `main.py`: Application entry point and API route definitions.
-    *   `model_definition.py`: PyTorch model architecture (currently unused by `main.py`).
-    *   `saved_assets/`: Directory containing trained models (`.joblib`, `.pth`), scalers, and feature lists.
-*   `k8s/`: Kubernetes manifests organized for Kustomize (base/overlays).
-*   `notebooks/`: Jupyter notebooks used for data analysis and model training (`lightgbm.ipynb`, `main.ipynb`).
-*   `Dockerfile`: Multi-stage Docker build definition.
-*   `requirements.txt`: Python dependencies.
 
 ## Building and Running
 
